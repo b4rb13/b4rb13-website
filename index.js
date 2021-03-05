@@ -43,7 +43,7 @@ const texts = {
           
           help          Show all the commands
           
-          hedgehogs     Say hello to hedgehogs</pre>`,
+          marvel        Say hello to marvel</pre>`,
   about: `Hi there! My name is Derenik. I am ${_calculateAge(
     new Date("1996-04-25")
   )} y/o JavaScript developer from Yerevan, Armenia. If you want to know about my work and technologies which I\'m using, just type "resume"`,
