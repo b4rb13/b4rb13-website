@@ -139,7 +139,7 @@ function checkCommand(e) {
       openLink(texts.linkedin);
       break;
     case "connect --telegram":
-      openLink(texts.instagram);
+      openLink(texts.telegram);
       break;
       default: 
       div.appendChild(createDivWithNotFound())
