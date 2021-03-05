@@ -145,6 +145,7 @@ function checkCommand(e) {
       div.appendChild(createDivWithNotFound())
   }
   input.value = "";
+  input.scrollIntoView()
 }
 
 form.addEventListener("submit", checkCommand);

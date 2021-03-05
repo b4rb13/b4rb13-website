@@ -20,7 +20,7 @@ body {
 .d2 {
   position: absolute;
   inset: 0px;
-  overflow: scroll;
+  overflow-y: scroll;
   margin-right: -17px;
   margin-bottom: -17px;
 }
@@ -75,6 +75,8 @@ body {
   font-family: monospace;
   font-size: 16px;
   color: rgb(32, 194, 14);
+  overflow: hidden;
+
 }
 
 form {
