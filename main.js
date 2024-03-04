@@ -4,8 +4,8 @@ const helpText = document.getElementById("helpText");
 const form = document.getElementById("form");
 
 const lastCommand = (command) => `<pre>> ${command}</pre>`;
-const sw = new Audio('./assets/sw.mp3');
-const av = new Audio('./assets/av.mp3');
+const sw = new Audio('/sw.mp3');
+const av = new Audio('/av.mp3');
 
 function _calculateAge(birthday) {
   // birthday is a date
