@@ -51,23 +51,31 @@ const texts = {
   about: `Hi there! My name is Derenik. I am ${_calculateAge(
     new Date("1996-04-25")
   )} y/o JavaScript developer from Yerevan, Armenia. If you want to know about my work and technologies which I\'m using, just type "resume"`,
-  contact: `You may contact with me via my e-mail address to@b4rb13.wtf, or using some social networks. Just type "connect --{network}", for example "connect --telegram". 
+  // contact: `You may contact with me via my e-mail address to@b4rb13.wtf, or using some social networks. Just type "connect --{network}", for example "connect --telegram". 
+  // <pre>
+  // This is a list of available communication channels:
+  //   \n
+  //   --facebook
+  //   \n
+  //   --github
+  //   \n
+  //   --instagram
+  //   \n
+  //   --linkedin
+  //   \n
+  //   --telegram
+  //   \n
+  //   --twitter
+  //   \n
+  //   --vk
+  // </pre>`,
+  contact: `You may contact with me via my e-mail address deren.kha@gmail.com, or using some social networks. Just type "connect --{network}", for example "connect --telegram". 
   <pre>
   This is a list of available communication channels:
     \n
-    --facebook
-    \n
     --github
     \n
-    --instagram
-    \n
-    --linkedin
-    \n
     --telegram
-    \n
-    --twitter
-    \n
-    --vk
   </pre>`,
   facebook: "https://www.facebook.com/Der.Khachatryan/",
   instagram: "https://instagram.com/derenik.khachatryan",
