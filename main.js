@@ -48,9 +48,17 @@ const texts = {
           marvel        Say hello to marvel
           
           starwars      Say hello to Star Wars</pre>`,
-  about: `Hi there! My name is Derenik. I am ${_calculateAge(
-    new Date("1996-04-25")
-  )} y/o JavaScript developer from Yerevan, Armenia. If you want to know about my work and technologies which I\'m using, just type "resume"`,
+  about: `I’m a Lead Frontend Engineer who sees interfaces as living systems — a bridge between logic and emotion. Over the years, I’ve led teams and built products that don’t just work fast — they feel fast. My craft revolves around creating cohesive, resilient architectures that empower both users and developers.
+
+My focus is on clarity, scalability, and experience — shaping design systems, defining frontend workflows, and mentoring engineers to think beyond implementation. I believe great frontend engineering is equal parts science and story: every pixel, every transition, every state update has a rhythm.
+
+I’ve led multiple teams through transitions — from legacy React apps to modern Next.js and TypeScript ecosystems, built shared UI libraries that scale across microfrontends, and introduced structured feature-definition processes that turned chaotic ideas into deliverable reality.
+
+When I code, I blend performance with poetry — clean structure, test-driven flow, and an instinct for what feels right.
+When I lead, I focus on people — creating alignment, rhythm, and space for creativity.
+
+I don’t just build apps.
+I build systems that outlast trends and teams that outgrow limitations.`,
   // contact: `You may contact with me via my e-mail address to@b4rb13.wtf, or using some social networks. Just type "connect --{network}", for example "connect --telegram". 
   // <pre>
   // This is a list of available communication channels:
