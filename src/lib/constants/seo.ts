@@ -18,7 +18,7 @@ export const SEO_CONFIG = {
     "Team Leadership",
     "Architecture",
   ],
-  url: "https://b4rb13.wtf",
+  url: "https://b4rb13.info",
   siteName: "b4rb13",
   locale: "en_US",
   type: "website",

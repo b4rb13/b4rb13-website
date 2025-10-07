@@ -1,10 +1,10 @@
-# Robots.txt for b4rb13.wtf
+# Robots.txt for b4rb13.info
 
 User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://b4rb13.wtf/sitemap.xml
+Sitemap: https://b4rb13.info/sitemap.xml
 
 # Crawl delay
 Crawl-delay: 1

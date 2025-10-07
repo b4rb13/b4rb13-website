@@ -43,3 +43,6 @@ next-env.d.ts
 
 # mcp
 .playwright-mcp
+
+# editor
+.idea
