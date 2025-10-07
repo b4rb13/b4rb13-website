@@ -1,120 +1,7 @@
-const input = document.getElementById("input");
-const div = document.getElementById("div");
-const helpText = document.getElementById("helpText");
-const form = document.getElementById("form");
+// ASCII Art content for terminal commands
 
-const lastCommand = (command) => `<pre>> ${command}</pre>`;
-const sw = new Audio('./dist/sw.mp3');
-const av = new Audio('./dist/av.mp3');
-
-function _calculateAge(birthday) {
-  // birthday is a date
-  let ageDifMs = Date.now() - birthday.getTime();
-  let ageDate = new Date(ageDifMs); // miliseconds from epoch
-  return Math.abs(ageDate.getUTCFullYear() - 1970);
-}
-
-function createDivWithContent(content) {
-  let p = document.createElement("p");
-  p.classList.add("text");
-  p.innerHTML = lastCommand(input.value).concat(content);
-  return p;
-}
-function createDivWithNotFound() {
-  let p = document.createElement("p");
-  p.classList.add("text");
-  p.innerHTML = lastCommand(input.value).concat(lastCommand(input.value + ":"+ texts.notFound));
-  return p;
-}
-
-function openLink(url) {
-  window.open(url, "_blank");
-}
-const texts = {
-  help: `<pre class="help">
-    Hi there! I'm Derenik, welcome to my own commandline interface website, 
-    these are common commands used in various situations:
-    
-          about         Show information about me
-          
-          resume        Show my resume
-          
-          clear         Clear the screen
-          
-          connect       Connect with me
-          
-          help          Show all the commands
-          
-          marvel        Say hello to marvel
-          
-          starwars      Say hello to Star Wars</pre>`,
-  about: `I’m a Lead Frontend Engineer who sees interfaces as living systems — a bridge between logic and emotion. Over the years, I’ve led teams and built products that don’t just work fast — they feel fast. My craft revolves around creating cohesive, resilient architectures that empower both users and developers.
-
-My focus is on clarity, scalability, and experience — shaping design systems, defining frontend workflows, and mentoring engineers to think beyond implementation. I believe great frontend engineering is equal parts science and story: every pixel, every transition, every state update has a rhythm.
-
-I’ve led multiple teams through transitions — from legacy React apps to modern Next.js and TypeScript ecosystems, built shared UI libraries that scale across microfrontends, and introduced structured feature-definition processes that turned chaotic ideas into deliverable reality.
-
-When I code, I blend performance with poetry — clean structure, test-driven flow, and an instinct for what feels right.
-When I lead, I focus on people — creating alignment, rhythm, and space for creativity.
-
-I don’t just build apps.
-I build systems that outlast trends and teams that outgrow limitations.`,
-  // contact: `You may contact with me via my e-mail address to@b4rb13.wtf, or using some social networks. Just type "connect --{network}", for example "connect --telegram". 
-  // <pre>
-  // This is a list of available communication channels:
-  //   \n
-  //   --facebook
-  //   \n
-  //   --github
-  //   \n
-  //   --instagram
-  //   \n
-  //   --linkedin
-  //   \n
-  //   --telegram
-  //   \n
-  //   --twitter
-  //   \n
-  //   --vk
-  // </pre>`,
-  contact: `You may contact with me via my e-mail address deren.kha@gmail.com, or using some social networks. Just type "connect --{network}", for example "connect --telegram". 
-  <pre>
-  This is a list of available communication channels:
-    \n
-    --github
-    \n
-    --telegram
-  </pre>`,
-  facebook: "https://www.facebook.com/Der.Khachatryan/",
-  instagram: "https://instagram.com/derenik.khachatryan",
-  telegram: "https://t.me/derkhachatryan",
-  vk: "https://vk.com/der.khachatryan",
-  linkedin: "https://linkedin.com/in/derenik-khachatryan/",
-  twitter: "https://twitter.com/__b4rb13",
-  github: "https://github.com/b4rb13",
-  resume:
-    "I'm working as a fullstack JavaScript developer with tremendous breadth experience in development single-page applications, responsive websites and Android/iOS mobile applications\n\nClient-side programming: HTML, CSS, JavaScript, React, Redux\nServer-side programming: Node.js, Express, GraphQL\nMobile development: Cordova, React Native\nDocument database: MongoDB\nServer-side administration: Heroku, Linux, Nginx\nProject-management: Git flow\nOther: Bot development (Telegram, Slack, FaceBook Messenger, etc.)\n\nIn my work I use the most advanced and high performance technologies like React.js library for building user interfaces, Redux for managing state of the application, Babel transplier for ensure the functionality of the application on various platforms. Also, I'm writing maintainable code\n\nI follow TDD methodology in order to ensure the stability of the application using Jest testing framework.\n\nI use Vim editor for development and work from an ArchLinux enviorenment",
-//   marvel: `<pre>
-//         ──────────────▐█████───────
-//         ──────▄▄████████████▄──────
-//         ────▄██▀▀────▐███▐████▄────
-//         ──▄██▀───────███▌▐██─▀██▄──
-//         ─▐██────────▐███─▐██───██▌─
-//         ─██▌────────███▌─▐██───▐██─
-//         ▐██────────▐███──▐██────██▌
-//         ██▌────────███▌──▐██────▐██
-//         ██▌───────▐███───▐██────▐██
-//         ██▌───────███▌──▄─▀█────▐██
-//         ██▌──────▐████████▄─────▐██
-//         ██▌──────█████████▀─────▐██
-//         ▐██─────▐██▌────▀─▄█────██▌
-//         ─██▌────███─────▄███───▐██─
-//         ─▐██▄──▐██▌───────────▄██▌─
-//         ──▀███─███─────────▄▄███▀──
-//         ──────▐██▌─▀█████████▀▀────
-//         ──────███──────────────────
-// </pre>`,
-marvel: `<pre>......................................................................................................................................................
+export const ASCII_ART = {
+  marvel: `<pre>......................................................................................................................................................
 ......................................................................................................................................................
 ......................................................................................................................................................
 ......................................................................................................................................................
@@ -168,8 +55,8 @@ marvel: `<pre>..................................................................
 ......................................................................................................................................................
 ......................................................................................................................................................
 ......................................................................................................................................................</pre>`,
-notFound: ' command not found',
-starwars: `<pre>
+
+  starwars: `<pre>
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -236,73 +123,5 @@ starwars: `<pre>
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-</pre>`
-};
-
-function checkCommand(e) {
-  e.preventDefault();
-  let value = e.target[0].value;
-  sw.pause()
-  sw.currentTime = 0;
-
-  av.pause()
-  av.currentTime = 0;
-
-  switch (value.toLowerCase().trim()) {
-    case "help":
-      div.appendChild(createDivWithContent(texts.help));
-      break;
-    case "about":
-      div.appendChild(createDivWithContent(texts.about));
-      break;
-    case "connect":
-      div.appendChild(createDivWithContent(texts.contact));
-      break;
-    case "resume":
-      div.appendChild(createDivWithContent(texts.resume));
-      break;
-    case "clear":
-      div.innerHTML = "";
-      helpText.innerHTML = "";
-      break;
-    case "marvel":
-      div.appendChild(createDivWithContent(texts.marvel));
-      av.play()
-      break;
-    case "starwars":
-      div.appendChild(createDivWithContent(texts.starwars));
-      sw.play()
-      break;
-    case "connect --instagram":
-      openLink(texts.instagram);
-      break;
-    case "connect --vk":
-      openLink(texts.vk);
-      break;
-    case "connect --facebook":
-      openLink(texts.facebook);
-      break;
-    case "connect --twitter":
-      openLink(texts.twitter);
-      break;
-    case "connect --github":
-      openLink(texts.github);
-      break;
-    case "connect --linkedin":
-      openLink(texts.linkedin);
-      break;
-    case "connect --telegram":
-      openLink(texts.telegram);
-      break;
-      default: 
-      div.appendChild(createDivWithNotFound())
-  }
-  input.value = "";
-  input.scrollIntoView()
-}
-
-form.addEventListener("submit", checkCommand);
-document.addEventListener("click", () => {
-  input.focus();
-});
+</pre>`,
+} as const;

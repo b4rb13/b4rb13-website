@@ -1,0 +1,55 @@
+{
+  "name": "b4rb13 - Terminal Portfolio",
+  "short_name": "b4rb13",
+  "description": "Lead Frontend Engineer specialized in React, Next.js, and TypeScript. Interactive terminal portfolio.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#20c20e",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/logo192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/logo512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["portfolio", "developer", "terminal"],
+  "shortcuts": [
+    {
+      "name": "About",
+      "short_name": "About",
+      "description": "Learn about Derenik",
+      "url": "/?command=about"
+    },
+    {
+      "name": "Connect",
+      "short_name": "Connect",
+      "description": "Get in touch",
+      "url": "/?command=connect"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/social.jpg",
+      "type": "image/jpeg",
+      "sizes": "1200x630",
+      "form_factor": "wide"
+    }
+  ]
+}
