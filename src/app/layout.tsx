@@ -1,6 +1,8 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
+
 import "./globals.css";
 import { generateMetadata, generateStructuredData } from "@/lib/constants/seo";
 
@@ -42,6 +44,7 @@ export default function RootLayout({
           strategy="lazyOnload"
         />
         {children}
+        <Analytics />
       </body>
     </html>
   );
