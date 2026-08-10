@@ -14,6 +14,7 @@ const EMPTY_SESSION: SessionSnapshot = {
   pending: null,
   error: null,
   answers: [],
+  prefill: null,
   done: false,
 };
 
@@ -100,6 +101,13 @@ export function useTerminal() {
           const runner = new SessionRunner(outcome, {
             onChange: setSession,
             onFinish: (result) => endSession(command, result),
+            // Back-navigation replays into a fresh session; see
+            // SessionRunner.back().
+            restart: () =>
+              handler.resolveSession(command) ??
+              (() => {
+                throw new Error("command no longer resolves to a session");
+              })(),
           });
           runnerRef.current = runner;
           await runner.start();
@@ -129,6 +137,14 @@ export function useTerminal() {
   const cancelSession = useCallback(() => {
     if (!runnerRef.current) return false;
     void runnerRef.current.cancel();
+    return true;
+  }, []);
+
+  /** Return to the previous step. No-op at the first step. */
+  const sessionBack = useCallback(() => {
+    const runner = runnerRef.current;
+    if (!runner?.canGoBack()) return false;
+    void runner.back();
     return true;
   }, []);
 
@@ -188,5 +204,6 @@ export function useTerminal() {
     sessionActive,
     submitSessionInput,
     cancelSession,
+    sessionBack,
   };
 }

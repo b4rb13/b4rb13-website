@@ -8,6 +8,7 @@ import { CommandLine } from "./CommandLine";
 import { CommandOutput } from "./CommandOutput";
 import { CommandSuggestions } from "./CommandSuggestions";
 import { MirrorIcon } from "./MirrorIcon";
+import { SessionPrompt } from "./SessionPrompt";
 import { SpeakerIcon } from "./SpeakerIcon";
 import { TerminalWindow } from "./TerminalWindow";
 
@@ -42,7 +43,15 @@ export function Terminal() {
     navigateHistory,
     clearHistory,
     addToHistory,
+    session,
+    sessionActive,
+    submitSessionInput,
+    cancelSession,
+    sessionBack,
   } = useTerminal();
+
+  // The command that started the live session, echoed above its transcript.
+  const sessionCommandRef = useRef("");
 
   // Audio hooks (currently unused but may be needed for future features)
   // const { playSound, stopAudio } = useAudio();
@@ -157,6 +166,7 @@ export function Terminal() {
     setShowSuggestions(false);
     setSuggestions([]);
 
+    sessionCommandRef.current = command;
     const result = await executeCommand(command);
 
     // Auto-scroll to bottom after command execution with improved timing
@@ -296,6 +306,15 @@ export function Terminal() {
                   onCancelCommand={() => handleCancelCommand("")}
                 />
               )
+            ) : sessionActive ? (
+              <SessionPrompt
+                command={sessionCommandRef.current}
+                session={session}
+                onSubmit={submitSessionInput}
+                onCancel={cancelSession}
+                onBack={sessionBack}
+                canGoBack={session.answers.length > 0}
+              />
             ) : (
               <>
                 <CommandLine

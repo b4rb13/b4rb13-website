@@ -1,6 +1,7 @@
 import { ASCII_ART } from "@/lib/constants/ascii-art";
 import { COMMAND_TEXTS, SOCIAL_LINKS } from "@/lib/constants/commands";
-import type { CommandResult } from "@/types/terminal";
+import type { CommandOutcome, CommandResult } from "@/types/terminal";
+import { messageFlow } from "./messageFlow";
 import type { CommandDefinition } from "./types";
 
 /**
@@ -33,9 +34,13 @@ const connect: CommandDefinition = {
   description: "Connect with me",
   category: "social",
   // Derived from SOCIAL_LINKS so a commented-out network can never be offered
-  // by Tab completion and then rejected on execution.
-  flags: SOCIAL_LINKS.map((link) => `--${link.command.split("--")[1]}`),
-  execute: (args: string[]): CommandResult => {
+  // by Tab completion and then rejected on execution. `--message` is appended
+  // because it is behaviour rather than a link.
+  flags: [
+    ...SOCIAL_LINKS.map((link) => `--${link.command.split("--")[1]}`),
+    "--message",
+  ],
+  execute: (args: string[]): CommandOutcome => {
     if (args.length === 0) {
       return { output: COMMAND_TEXTS.contact, type: "text" };
     }
@@ -43,6 +48,11 @@ const connect: CommandDefinition = {
     // The old switch lowercased the whole input, so `--GitHub` worked. Keep
     // that, but only for flag matching — a session must see raw arguments.
     const platform = args[0].toLowerCase().replace("--", "");
+
+    // The one flag that starts a conversation rather than opening a URL.
+    if (platform === "message") {
+      return messageFlow();
+    }
     const socialLink = SOCIAL_LINKS.find((link) =>
       link.command.includes(platform),
     );

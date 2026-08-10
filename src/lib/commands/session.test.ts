@@ -92,8 +92,8 @@ describe("SessionRunner", () => {
     await runner.submit("y");
 
     expect(runner.getState().answers).toEqual([
-      { label: "name", value: "Derenik" },
-      { label: "send this?", value: "y" },
+      { label: "name", value: "Derenik", sent: "Derenik" },
+      { label: "send this?", value: "y", sent: true },
     ]);
   });
 
@@ -194,5 +194,131 @@ describe("SessionRunner", () => {
     const { runner } = collect(twoStepFlow());
     await runner.start();
     expect(runner.completionsFor("")).toEqual([]);
+  });
+});
+
+describe("SessionRunner.back", () => {
+  /** Three fields, so there is a middle step to return to. */
+  function threeStepFlow(): CommandSession {
+    return (async function* () {
+      const a = (yield { kind: "ask", key: "a", label: "a" }) as string;
+      const b = (yield { kind: "ask", key: "b", label: "b" }) as string;
+      const c = (yield { kind: "ask", key: "c", label: "c" }) as string;
+      return { output: `${a}/${b}/${c}`, type: "text" };
+    })();
+  }
+
+  function withBack() {
+    let finished: CommandResult | null = null;
+    const runner = new SessionRunner(threeStepFlow(), {
+      onChange: () => {},
+      onFinish: (r) => {
+        finished = r;
+      },
+      restart: threeStepFlow,
+    });
+    return { runner, result: () => finished as CommandResult | null };
+  }
+
+  test("is unavailable at the first step", async () => {
+    const { runner } = withBack();
+    await runner.start();
+    expect(runner.canGoBack()).toBe(false);
+    expect(await runner.back()).toBe(false);
+  });
+
+  test("is unavailable when no restart factory was supplied", async () => {
+    const runner = new SessionRunner(threeStepFlow(), {
+      onChange: () => {},
+      onFinish: () => {},
+    });
+    await runner.start();
+    await runner.submit("one");
+    expect(runner.canGoBack()).toBe(false);
+  });
+
+  test("returns to the previous step with the answer restored", async () => {
+    const { runner } = withBack();
+    await runner.start();
+    await runner.submit("one");
+    await runner.submit("two");
+    expect(runner.getState().step?.label).toBe("c");
+
+    expect(await runner.back()).toBe(true);
+    expect(runner.getState().step?.label).toBe("b");
+    expect(runner.getState().prefill).toBe("two");
+    expect(runner.getState().answers).toEqual([
+      { label: "a", value: "one", sent: "one" },
+    ]);
+  });
+
+  test("a corrected answer flows through to the result", async () => {
+    const { runner, result } = withBack();
+    await runner.start();
+    await runner.submit("one");
+    await runner.submit("typo");
+    await runner.back();
+    await runner.submit("fixed");
+    await runner.submit("three");
+
+    expect(result()?.output).toBe("one/fixed/three");
+  });
+
+  test("stepping back twice reaches the first step", async () => {
+    const { runner } = withBack();
+    await runner.start();
+    await runner.submit("one");
+    await runner.submit("two");
+
+    await runner.back();
+    await runner.back();
+
+    expect(runner.getState().step?.label).toBe("a");
+    expect(runner.getState().prefill).toBe("one");
+    expect(runner.canGoBack()).toBe(false);
+  });
+
+  test("emits exactly one snapshot for a back, not the whole replay", async () => {
+    const snapshots: SessionSnapshot[] = [];
+    const runner = new SessionRunner(threeStepFlow(), {
+      onChange: (s) => snapshots.push(s),
+      onFinish: () => {},
+      restart: threeStepFlow,
+    });
+    await runner.start();
+    await runner.submit("one");
+    await runner.submit("two");
+
+    const before = snapshots.length;
+    await runner.back();
+    expect(snapshots.length - before).toBe(1);
+  });
+
+  test("clears a validation error when stepping back", async () => {
+    function validating(): CommandSession {
+      return (async function* () {
+        const a = (yield { kind: "ask", key: "a", label: "a" }) as string;
+        yield {
+          kind: "ask",
+          key: "b",
+          label: "b",
+          validate: (v: string) => (v === "bad" ? "no" : null),
+        };
+        return { output: a, type: "text" };
+      })();
+    }
+    const runner = new SessionRunner(validating(), {
+      onChange: () => {},
+      onFinish: () => {},
+      restart: validating,
+    });
+    await runner.start();
+    await runner.submit("one");
+    await runner.submit("bad");
+    expect(runner.getState().error).toBe("no");
+
+    await runner.back();
+    expect(runner.getState().error).toBeNull();
+    expect(runner.getState().step?.label).toBe("a");
   });
 });
