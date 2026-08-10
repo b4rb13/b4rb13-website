@@ -2,8 +2,7 @@ import type { SocialLink } from "@/types/terminal";
 
 // Command text content
 export const COMMAND_TEXTS = {
-  help: `<pre class="help">
-Hi there! I'm Derenik, welcome to my own commandline interface website, 
+  help: `Hi there! I'm Derenik, welcome to my own commandline interface website, 
 these are common commands used in various situations:
 
       about         Show information about me
@@ -18,7 +17,7 @@ these are common commands used in various situations:
       
       starwars      Say hello to Star Wars
       
-      mirror        ASCII camera mirror with variants (--v1, --v2, --v3)</pre>`,
+      mirror        ASCII camera mirror with variants (--v1, --v2, --v3)`,
 
   about: `I'm a Lead Frontend Engineer who sees interfaces as living systems — a bridge between logic and emotion. Over the years, I've led teams and built products that don't just work fast — they feel fast. My craft revolves around creating cohesive, resilient architectures that empower both users and developers.
 
@@ -32,16 +31,15 @@ When I lead, I focus on people — creating alignment, rhythm, and space for cre
 I don't just build apps.
 I build systems that outlast trends and teams that outgrow limitations.`,
 
-  contact: `You may contact with me via my e-mail address deren.kha@gmail.com, or using some social networks. Just type "connect --{network}", for example "connect --telegram". 
-  <pre>
+  contact: `You may contact with me via my e-mail address deren.kha@gmail.com, or using some social networks. Just type "connect --{network}", for example "connect --telegram".
+
   This is a list of available communication channels:
     
     --github
     
     --telegram
 
-    --linkedin
-  </pre>`,
+    --linkedin`,
 
 //   resume: `I'm working as a fullstack JavaScript developer with tremendous breadth experience in development single-page applications, responsive websites and Android/iOS mobile applications
 

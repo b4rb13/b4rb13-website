@@ -23,37 +23,36 @@ export function CommandOutput({
     variant?: string,
     uniqueId?: string,
   ) => {
-    const baseClasses =
-      "whitespace-pre-wrap break-words font-mono text-xs sm:text-sm leading-relaxed";
+    // Whitespace handling is per-type and must NOT live in baseClasses: prose
+    // wraps, ASCII art must not. Tailwind emits both utilities at equal
+    // specificity, so a branch appending `whitespace-pre` to a base that
+    // already has `whitespace-pre-wrap` silently loses to source order.
+    const baseClasses = "font-mono text-xs sm:text-sm leading-relaxed";
+    const proseClasses = `${baseClasses} whitespace-pre-wrap break-words`;
 
+    // Output is rendered as text, never as HTML. Commands interpolate user
+    // input into these strings (e.g. the "command not found" message), so
+    // treating it as markup would be an XSS sink. React escapes JSX children.
     switch (type) {
       case "error":
         return (
-          <div
-            className={`${baseClasses} text-terminal-red`}
-            // biome-ignore lint/security/noDangerouslySetInnerHtml: Required for terminal output formatting
-            dangerouslySetInnerHTML={{ __html: output }}
-          />
+          <div className={`${proseClasses} text-terminal-red`}>{output}</div>
         );
       case "ascii":
         return (
           <div
-            className={`${baseClasses} text-terminal-green text-[8px] sm:text-xs overflow-x-auto whitespace-pre font-mono`}
-            // biome-ignore lint/security/noDangerouslySetInnerHtml: Required for ASCII art rendering
-            dangerouslySetInnerHTML={{ __html: output }}
-          />
+            className={`${baseClasses} text-terminal-green text-[8px] sm:text-xs overflow-x-auto whitespace-pre`}
+          >
+            {output}
+          </div>
         );
       case "link":
         return (
-          <div
-            className={`${baseClasses} text-terminal-blue`}
-            // biome-ignore lint/security/noDangerouslySetInnerHtml: Required for link formatting
-            dangerouslySetInnerHTML={{ __html: output }}
-          />
+          <div className={`${proseClasses} text-terminal-blue`}>{output}</div>
         );
       case "cancelled":
         return (
-          <div className={`${baseClasses} text-terminal-green/60`}>^C</div>
+          <div className={`${proseClasses} text-terminal-green/60`}>^C</div>
         );
       case "mirror":
         return (
@@ -65,11 +64,7 @@ export function CommandOutput({
         );
       default:
         return (
-          <div
-            className={`${baseClasses} text-terminal-green`}
-            // biome-ignore lint/security/noDangerouslySetInnerHtml: Required for terminal output formatting
-            dangerouslySetInnerHTML={{ __html: output }}
-          />
+          <div className={`${proseClasses} text-terminal-green`}>{output}</div>
         );
     }
   };
