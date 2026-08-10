@@ -1,33 +1,25 @@
 /**
- * Utility functions for command autocompletion
+ * Utility functions for command autocompletion.
+ *
+ * Command names and flags come from the registry — this file used to keep its
+ * own copies, which drifted: it offered `--twitter` while that entry was
+ * commented out of SOCIAL_LINKS, so completing it produced "Platform not
+ * found".
  */
 
-// Available terminal commands
-export const AVAILABLE_COMMANDS = [
-  "help",
-  "about",
-  "connect",
-  // "resume",
-  "clear",
-  "marvel",
-  "starwars",
-  "mirror",
-] as const;
+import { BUILT_IN_COMMANDS } from "@/lib/commands/builtins";
+import type { CommandDefinition } from "@/lib/commands/types";
 
-// Available flags for connect command
-export const CONNECT_FLAGS = [
-  "--github",
-  "--telegram",
-  "--linkedin",
-  "--twitter",
-] as const;
+function visible(commands: CommandDefinition[]): CommandDefinition[] {
+  return commands.filter((command) => !command.hidden);
+}
 
-// Available flags for mirror command
-export const MIRROR_FLAGS = ["--v1", "--v2", "--v3"] as const;
-
-export type AvailableCommand = (typeof AVAILABLE_COMMANDS)[number];
-export type ConnectFlag = (typeof CONNECT_FLAGS)[number];
-export type MirrorFlag = (typeof MIRROR_FLAGS)[number];
+function flagsFor(commands: CommandDefinition[], name: string): string[] {
+  const command = commands.find(
+    (candidate) => candidate.name.toLowerCase() === name.toLowerCase(),
+  );
+  return command?.flags ?? [];
+}
 
 /**
  * Parse input to determine command and arguments
@@ -40,8 +32,12 @@ export function parseCommandInput(input: string): {
 } {
   const trimmed = input.trim();
   const parts = trimmed.split(/\s+/);
+  // Must test the raw input: `trimmed` can never end in a space, so the
+  // original `trimmed.endsWith(" ")` checks below were dead and `connect ` +
+  // Tab re-completed the command name instead of listing its flags.
+  const endsWithSpace = input.endsWith(" ");
 
-  if (parts.length === 1 && !trimmed.endsWith(" ")) {
+  if (parts.length === 1 && !endsWithSpace) {
     // Still typing the command
     return {
       command: parts[0],
@@ -51,7 +47,7 @@ export function parseCommandInput(input: string): {
     };
   }
 
-  if (parts.length === 1 && trimmed.endsWith(" ")) {
+  if (parts.length === 1 && endsWithSpace) {
     // Command is complete, ready for first argument
     return {
       command: parts[0],
@@ -69,7 +65,7 @@ export function parseCommandInput(input: string): {
   return {
     command,
     args,
-    currentArg: trimmed.endsWith(" ") ? "" : currentArg,
+    currentArg: endsWithSpace ? "" : currentArg,
     isCommandComplete: true,
   };
 }
@@ -77,39 +73,35 @@ export function parseCommandInput(input: string): {
 /**
  * Get commands that match the given prefix
  */
-export function getMatchingCommands(prefix: string): string[] {
+export function getMatchingCommands(
+  prefix: string,
+  commands: CommandDefinition[] = BUILT_IN_COMMANDS,
+): string[] {
   if (!prefix.trim()) {
     return [];
   }
 
   const lowerPrefix = prefix.toLowerCase().trim();
-  return AVAILABLE_COMMANDS.filter((command) =>
-    command.startsWith(lowerPrefix),
-  );
+  return visible(commands)
+    .map((command) => command.name)
+    .filter((name) => name.toLowerCase().startsWith(lowerPrefix));
 }
 
 /**
  * Get matching flags for connect command
  */
-export function getMatchingConnectFlags(prefix: string): string[] {
+export function getMatchingFlags(
+  command: string,
+  prefix: string,
+  commands: CommandDefinition[] = BUILT_IN_COMMANDS,
+): string[] {
+  const flags = flagsFor(commands, command);
   if (!prefix.trim()) {
-    return CONNECT_FLAGS.slice(); // Return all flags if no prefix
+    return flags.slice();
   }
 
   const lowerPrefix = prefix.toLowerCase().trim();
-  return CONNECT_FLAGS.filter((flag) => flag.startsWith(lowerPrefix));
-}
-
-/**
- * Get matching flags for mirror command
- */
-export function getMatchingMirrorFlags(prefix: string): string[] {
-  if (!prefix.trim()) {
-    return MIRROR_FLAGS.slice(); // Return all flags if no prefix
-  }
-
-  const lowerPrefix = prefix.toLowerCase().trim();
-  return MIRROR_FLAGS.filter((flag) => flag.startsWith(lowerPrefix));
+  return flags.filter((flag) => flag.toLowerCase().startsWith(lowerPrefix));
 }
 
 /**
@@ -147,49 +139,25 @@ export function getAutocompleteSuggestion(input: string): {
     };
   }
 
-  // Command is complete, check for argument completion
-  if (parsed.command.toLowerCase() === "connect") {
-    const flagMatches = getMatchingConnectFlags(parsed.currentArg);
+  // Command is complete — offer whatever flags it declares.
+  const name = parsed.command.toLowerCase();
+  const flagMatches = getMatchingFlags(name, parsed.currentArg);
 
-    if (flagMatches.length === 0) {
-      return { type: "none" };
-    }
-
-    if (flagMatches.length === 1) {
-      return {
-        type: "complete",
-        completion: flagMatches[0],
-        context: "connect-flag",
-      };
-    }
-
-    return {
-      type: "multiple",
-      suggestions: flagMatches,
-      context: "connect-flag",
-    };
-  }
-
-  if (parsed.command.toLowerCase() === "mirror") {
-    const flagMatches = getMatchingMirrorFlags(parsed.currentArg);
-
-    if (flagMatches.length === 0) {
-      return { type: "none" };
-    }
+  if (flagMatches.length > 0) {
+    // The suggestion bar styles these two contexts differently; anything else
+    // falls back to the generic command styling.
+    const context =
+      name === "connect"
+        ? ("connect-flag" as const)
+        : name === "mirror"
+          ? ("mirror-flag" as const)
+          : ("command" as const);
 
     if (flagMatches.length === 1) {
-      return {
-        type: "complete",
-        completion: flagMatches[0],
-        context: "mirror-flag",
-      };
+      return { type: "complete", completion: flagMatches[0], context };
     }
 
-    return {
-      type: "multiple",
-      suggestions: flagMatches,
-      context: "mirror-flag",
-    };
+    return { type: "multiple", suggestions: flagMatches, context };
   }
 
   // No argument completion for other commands

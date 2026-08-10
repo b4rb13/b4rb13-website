@@ -1,8 +1,9 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useTerminal } from "@/hooks/useTerminal";
+import { AUDIO_FILES } from "@/lib/constants/commands";
 import { CommandLine } from "./CommandLine";
 import { CommandOutput } from "./CommandOutput";
 import { CommandSuggestions } from "./CommandSuggestions";
@@ -156,31 +157,38 @@ export function Terminal() {
     setShowSuggestions(false);
     setSuggestions([]);
 
-    await executeCommand(command);
+    const result = await executeCommand(command);
 
     // Auto-scroll to bottom after command execution with improved timing
     scrollToBottom();
 
-    // Handle audio commands based on the result
-    const trimmedCommand = command.toLowerCase().trim();
-    if (trimmedCommand === "marvel") {
-      setTimeout(() => startLongRunningCommand("marvel", "/audio/av.mp3"), 100);
-    } else if (trimmedCommand === "starwars") {
-      setTimeout(
-        () => startLongRunningCommand("starwars", "/audio/sw.mp3"),
-        100
-      );
-    }
+    // Every side effect is driven by the result the command returned. The
+    // raw input string is never re-parsed here — that was a second source of
+    // truth and it silently ignored the action the command had already set.
+    if (!result) return;
 
-    // Handle mirror commands
-    if (trimmedCommand.startsWith("mirror")) {
-      const variant = trimmedCommand.includes("--v2")
-        ? "v2"
-        : trimmedCommand.includes("--v3")
-        ? "v3"
-        : "v1";
-
-      setTimeout(() => startMirrorCommand(`mirror ${variant}`), 100);
+    switch (result.action) {
+      case "clear":
+        clearHistory();
+        break;
+      case "openLink":
+        if (result.actionData?.url) {
+          window.open(result.actionData.url, "_blank");
+        }
+        break;
+      case "playAudio": {
+        const name = result.actionData?.audioFile;
+        const src = AUDIO_FILES.find((file) => file.name === name)?.src;
+        if (name && src) {
+          setTimeout(() => startLongRunningCommand(name, src), 100);
+        }
+        break;
+      }
+      case "mirror": {
+        const variant = result.actionData?.variant ?? "v1";
+        setTimeout(() => startMirrorCommand(`mirror ${variant}`), 100);
+        break;
+      }
     }
   };
 
@@ -221,7 +229,7 @@ export function Terminal() {
   const handleSuggestionsChange = (
     newSuggestions: string[],
     visible: boolean,
-    context: "command" | "connect-flag" | "mirror-flag" = "command"
+    context: "command" | "connect-flag" | "mirror-flag" = "command",
   ) => {
     setSuggestions(newSuggestions);
     setShowSuggestions(visible);

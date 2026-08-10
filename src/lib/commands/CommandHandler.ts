@@ -1,33 +1,34 @@
 import { COMMAND_TEXTS } from "@/lib/constants/commands";
-import type { CommandResult } from "@/types/terminal";
+import type { CommandOutcome } from "@/types/terminal";
+import { BUILT_IN_COMMANDS } from "./builtins";
 import { CommandRegistry } from "./CommandRegistry";
 import type { CommandDefinition, ICommandHandler } from "./types";
 
 /**
- * Handles command parsing and execution
+ * Parses input and dispatches to the registry.
+ *
+ * Returns the command's raw outcome — a result or a session — so the caller
+ * decides how to drive it. Nothing here inspects the command string beyond
+ * splitting it, and nothing downstream re-parses it.
  */
 export class CommandHandler implements ICommandHandler {
   private registry: CommandRegistry;
 
-  constructor() {
+  constructor(commands: CommandDefinition[] = BUILT_IN_COMMANDS) {
     this.registry = new CommandRegistry();
-    this.initializeBuiltInCommands();
+    for (const command of commands) {
+      this.registry.register(command);
+    }
   }
 
-  /**
-   * Execute a command from user input
-   */
-  async executeCommand(commandInput: string): Promise<CommandResult> {
+  async executeCommand(commandInput: string): Promise<CommandOutcome> {
     const trimmedInput = commandInput.trim();
 
     if (!trimmedInput) {
-      return {
-        output: "",
-        type: "text",
-      };
+      return { output: "", type: "text" };
     }
 
-    const [commandName, ...args] = trimmedInput.split(" ");
+    const [commandName, ...args] = trimmedInput.split(/\s+/);
     const command = this.registry.find(commandName);
 
     if (!command) {
@@ -37,35 +38,20 @@ export class CommandHandler implements ICommandHandler {
       };
     }
 
-    try {
-      return await command.execute(args);
-    } catch (error) {
-      return {
-        output: `Error executing command: ${error instanceof Error ? error.message : "Unknown error"}`,
-        type: "error",
-      };
-    }
+    // Commands were case-insensitive by name only; arguments keep their case
+    // so a session can echo what the visitor actually typed.
+    return command.execute(args);
   }
 
-  /**
-   * Get all available commands
-   */
   getAvailableCommands(): CommandDefinition[] {
     return this.registry.getAvailableCommands();
   }
 
-  /**
-   * Register a new command
-   */
   registerCommand(command: CommandDefinition): void {
     this.registry.register(command);
   }
 
-  /**
-   * Initialize built-in commands
-   */
-  private initializeBuiltInCommands(): void {
-    // Commands will be registered here - placeholder for now
-    // This will be implemented when we create individual command files
+  getRegistry(): CommandRegistry {
+    return this.registry;
   }
 }
