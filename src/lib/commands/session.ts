@@ -20,10 +20,13 @@ export function isCommandSession(
   );
 }
 
-/** One answered step, kept for the on-screen transcript. */
+/** One answered step, kept for the on-screen transcript and for replay. */
 export interface SessionAnswer {
   label: string;
+  /** What to show in the transcript. */
   value: string;
+  /** What was actually handed to the generator — needed to replay on back(). */
+  sent: string | boolean;
 }
 
 /** A step that actually suspends the generator. `status` never does. */
@@ -37,6 +40,8 @@ export interface SessionSnapshot {
   /** Validation problem for the current step. */
   error: string | null;
   answers: SessionAnswer[];
+  /** Value to seed the field with, set when returning to an earlier step. */
+  prefill: string | null;
   done: boolean;
 }
 
@@ -45,6 +50,7 @@ const EMPTY: SessionSnapshot = {
   pending: null,
   error: null,
   answers: [],
+  prefill: null,
   done: false,
 };
 
@@ -62,21 +68,39 @@ export class SessionRunner {
   private onChange: (snapshot: SessionSnapshot) => void;
   private onFinish: (result: CommandResult) => void;
   private finished = false;
+  /**
+   * Optional. Generators cannot rewind, so going back a step means starting a
+   * fresh session and replaying the earlier answers into it. Only supply this
+   * for flows with no side effects before the final step — otherwise replay
+   * repeats them.
+   */
+  private restart?: () => CommandSession;
 
   constructor(
     session: CommandSession,
     handlers: {
       onChange: (snapshot: SessionSnapshot) => void;
       onFinish: (result: CommandResult) => void;
+      restart?: () => CommandSession;
     },
   ) {
     this.session = session;
     this.onChange = handlers.onChange;
     this.onFinish = handlers.onFinish;
+    this.restart = handlers.restart;
   }
 
   getState(): SessionSnapshot {
     return this.snapshot;
+  }
+
+  /** True when there is an earlier step to return to. */
+  canGoBack(): boolean {
+    return (
+      !this.finished &&
+      this.restart !== undefined &&
+      this.snapshot.answers.length > 0
+    );
   }
 
   private set(patch: Partial<SessionSnapshot>) {
@@ -116,7 +140,13 @@ export class SessionRunner {
 
   private finish(result: CommandResult) {
     this.finished = true;
-    this.set({ step: null, pending: null, error: null, done: true });
+    this.set({
+      step: null,
+      pending: null,
+      error: null,
+      prefill: null,
+      done: true,
+    });
     this.onFinish(result);
   }
 
@@ -143,9 +173,10 @@ export class SessionRunner {
       this.set({
         answers: [
           ...this.snapshot.answers,
-          { label: step.label, value: yes ? "y" : "n" },
+          { label: step.label, value: yes ? "y" : "n", sent: yes },
         ],
         error: null,
+        prefill: null,
       });
       await this.advance(yes);
       return;
@@ -158,10 +189,56 @@ export class SessionRunner {
     }
 
     this.set({
-      answers: [...this.snapshot.answers, { label: step.label, value: raw }],
+      answers: [
+        ...this.snapshot.answers,
+        { label: step.label, value: raw, sent: raw },
+      ],
       error: null,
+      prefill: null,
     });
     await this.advance(raw);
+  }
+
+  /**
+   * Return to the previous step with its answer restored for editing.
+   *
+   * Implemented by replaying: a fresh session is created and fed every answer
+   * except the last, which is handed back as `prefill`. Snapshots are
+   * suppressed during the replay so the UI only sees the final position.
+   */
+  async back(): Promise<boolean> {
+    if (!this.canGoBack() || !this.restart) return false;
+
+    const answers = this.snapshot.answers;
+    const keep = answers.slice(0, -1);
+    const undone = answers[answers.length - 1];
+
+    const previousSession = this.session;
+    const emit = this.onChange;
+    this.onChange = () => {};
+
+    try {
+      this.session = this.restart();
+      this.snapshot = { ...EMPTY };
+      await this.advance();
+      for (const answer of keep) {
+        await this.advance(answer.sent);
+      }
+      this.snapshot = {
+        ...this.snapshot,
+        answers: keep,
+        prefill: typeof undone.sent === "string" ? undone.sent : undone.value,
+        error: null,
+      };
+    } finally {
+      this.onChange = emit;
+    }
+
+    // The abandoned generator still holds a suspended frame; let it clean up.
+    void previousSession.return?.({ output: "", type: "cancelled" });
+
+    this.onChange(this.snapshot);
+    return true;
   }
 
   /** Abandon the session. The generator's finally blocks still run. */
@@ -173,7 +250,13 @@ export class SessionRunner {
     } catch {
       // A generator that throws on return has nothing useful to tell us.
     }
-    this.set({ step: null, pending: null, error: null, done: true });
+    this.set({
+      step: null,
+      pending: null,
+      error: null,
+      prefill: null,
+      done: true,
+    });
     this.onFinish({ output: "", type: "cancelled" });
   }
 

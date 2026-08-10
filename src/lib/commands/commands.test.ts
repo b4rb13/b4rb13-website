@@ -142,7 +142,12 @@ describe("autocomplete reads the registry", () => {
 
   test("connect flags match the social links that actually exist", () => {
     const flags = getMatchingFlags("connect", "");
-    expect(flags).toEqual(["--github", "--telegram", "--linkedin"]);
+    expect(flags).toEqual([
+      "--github",
+      "--telegram",
+      "--linkedin",
+      "--message",
+    ]);
   });
 
   test("it no longer offers --twitter, which had no social link", () => {
@@ -151,6 +156,14 @@ describe("autocomplete reads the registry", () => {
     // produced "Platform not found".
     expect(getMatchingFlags("connect", "--t")).toEqual(["--telegram"]);
     expect(getMatchingFlags("connect", "")).not.toContain("--twitter");
+  });
+
+  test("--message completes and is offered alongside the links", () => {
+    expect(getAutocompleteSuggestion("connect --m")).toEqual({
+      type: "complete",
+      completion: "--message",
+      context: "connect-flag",
+    });
   });
 
   test("mirror flags come from the mirror command", () => {
@@ -168,7 +181,7 @@ describe("autocomplete reads the registry", () => {
     // the command name instead of offering flags.
     expect(getAutocompleteSuggestion("connect ")).toMatchObject({
       type: "multiple",
-      suggestions: ["--github", "--telegram", "--linkedin"],
+      suggestions: ["--github", "--telegram", "--linkedin", "--message"],
       context: "connect-flag",
     });
   });

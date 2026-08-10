@@ -17,7 +17,9 @@ these are common commands used in various situations:
       
       starwars      Say hello to Star Wars
       
-      mirror        ASCII camera mirror with variants (--v1, --v2, --v3)`,
+      mirror        ASCII camera mirror with variants (--v1, --v2, --v3)
+
+Tip: "connect --message" opens a prompt to send me a message directly.`,
 
   about: `I'm a Lead Frontend Engineer who sees interfaces as living systems — a bridge between logic and emotion. Over the years, I've led teams and built products that don't just work fast — they feel fast. My craft revolves around creating cohesive, resilient architectures that empower both users and developers.
 
@@ -32,6 +34,10 @@ I don't just build apps.
 I build systems that outlast trends and teams that outgrow limitations.`,
 
   contact: `You may contact with me via my e-mail address deren.kha@gmail.com, or using some social networks. Just type "connect --{network}", for example "connect --telegram".
+
+Or send me a message right here without leaving the terminal:
+
+    connect --message
 
   This is a list of available communication channels:
     
