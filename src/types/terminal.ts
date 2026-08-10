@@ -10,7 +10,9 @@ export interface Command {
 export interface CommandResult {
   output: string;
   type: "text" | "ascii" | "error" | "link" | "cancelled" | "mirror";
-  action?: "openLink" | "playAudio" | "clear" | "mirror";
+  // "startSession" is a SPIKE addition for ticket #8. The real contract (#6)
+  // has execute() return a generator rather than signalling through an action.
+  action?: "openLink" | "playAudio" | "clear" | "mirror" | "startSession";
   actionData?: {
     url?: string;
     audioFile?: string;

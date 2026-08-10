@@ -32,6 +32,15 @@ export async function executeBasicCommand(
         };
       }
 
+      // SPIKE (#8): starts the interactive message flow.
+      if (args[0] === "--message") {
+        return {
+          output: "",
+          type: "text",
+          action: "startSession",
+        };
+      }
+
       // Handle connect with specific platform
       const platform = args[0].replace("--", "");
       const socialLink = SOCIAL_LINKS.find((link) =>

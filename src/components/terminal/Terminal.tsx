@@ -2,11 +2,14 @@
 
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { usePromptSession } from "@/hooks/usePromptSession";
 import { useTerminal } from "@/hooks/useTerminal";
+import type { FlowResult } from "@/lib/commands/prototype/messageFlow";
 import { CommandLine } from "./CommandLine";
 import { CommandOutput } from "./CommandOutput";
 import { CommandSuggestions } from "./CommandSuggestions";
 import { MirrorIcon } from "./MirrorIcon";
+import { SessionPrompt } from "./SessionPrompt";
 import { SpeakerIcon } from "./SpeakerIcon";
 import { TerminalWindow } from "./TerminalWindow";
 
@@ -70,6 +73,28 @@ export function Terminal() {
       }
     });
   }, []);
+
+  // SPIKE (#8): interactive `connect --message` session. Answers land in the
+  // visible transcript only — never in commandHistory, so up-arrow can never
+  // recall a visitor's email or message (decision from #6).
+  const handleSessionFinish = useCallback(
+    (result: FlowResult) => {
+      addToHistory(
+        "connect --message",
+        result.outcome === "sent"
+          ? {
+              output:
+                "Thanks — your message is on its way, and a confirmation is heading to your inbox.",
+              type: "text",
+            }
+          : { output: "", type: "cancelled" },
+      );
+      scrollToBottom();
+    },
+    [addToHistory, scrollToBottom],
+  );
+
+  const session = usePromptSession(handleSessionFinish);
 
   const startLongRunningCommand = (commandName: string, audioSrc: string) => {
     setIsCommandRunning(true);
@@ -156,7 +181,14 @@ export function Terminal() {
     setShowSuggestions(false);
     setSuggestions([]);
 
-    await executeCommand(command);
+    const result = await executeCommand(command);
+
+    // SPIKE (#8): a command can hand control to an interactive session.
+    if (result?.action === "startSession") {
+      session.start();
+      scrollToBottom();
+      return;
+    }
 
     // Auto-scroll to bottom after command execution with improved timing
     scrollToBottom();
@@ -288,6 +320,15 @@ export function Terminal() {
                   onCancelCommand={() => handleCancelCommand("")}
                 />
               )
+            ) : session.active ? (
+              <SessionPrompt
+                lines={session.lines}
+                prompt={session.prompt}
+                error={session.error}
+                pending={session.pending}
+                onSubmit={session.submit}
+                onCancel={session.cancel}
+              />
             ) : (
               <>
                 <CommandLine

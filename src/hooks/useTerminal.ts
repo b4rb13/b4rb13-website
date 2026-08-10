@@ -47,7 +47,7 @@ export function useTerminal() {
    * Execute a command
    */
   const executeCommand = useCallback(
-    async (command: string) => {
+    async (command: string): Promise<CommandResult | undefined> => {
       if (!command.trim()) return;
 
       setState((prev) => ({ ...prev, isLoading: true }));
@@ -58,6 +58,12 @@ export function useTerminal() {
           "@/lib/commands/basicCommands"
         );
         const result = await executeBasicCommand(command.trim());
+
+        // SPIKE (#8): an interactive session writes its own history entry when
+        // it finishes, so skip the immediate one to avoid a duplicate.
+        if (result.action === "startSession") {
+          return result; // `finally` clears isLoading
+        }
 
         addToHistory(command, result);
 
