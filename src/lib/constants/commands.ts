@@ -41,21 +41,21 @@ I build systems that outlast trends and teams that outgrow limitations.`,
 
     --linkedin`,
 
-//   resume: `I'm working as a fullstack JavaScript developer with tremendous breadth experience in development single-page applications, responsive websites and Android/iOS mobile applications
+  //   resume: `I'm working as a fullstack JavaScript developer with tremendous breadth experience in development single-page applications, responsive websites and Android/iOS mobile applications
 
-// Client-side programming: HTML, CSS, JavaScript, React, Redux
-// Server-side programming: Node.js, Express, GraphQL
-// Mobile development: Cordova, React Native
-// Document database: MongoDB
-// Server-side administration: Heroku, Linux, Nginx
-// Project-management: Git flow
-// Other: Bot development (Telegram, Slack, FaceBook Messenger, etc.)
+  // Client-side programming: HTML, CSS, JavaScript, React, Redux
+  // Server-side programming: Node.js, Express, GraphQL
+  // Mobile development: Cordova, React Native
+  // Document database: MongoDB
+  // Server-side administration: Heroku, Linux, Nginx
+  // Project-management: Git flow
+  // Other: Bot development (Telegram, Slack, FaceBook Messenger, etc.)
 
-// In my work I use the most advanced and high performance technologies like React.js library for building user interfaces, Redux for managing state of the application, Babel transplier for ensure the functionality of the application on various platforms. Also, I'm writing maintainable code
+  // In my work I use the most advanced and high performance technologies like React.js library for building user interfaces, Redux for managing state of the application, Babel transplier for ensure the functionality of the application on various platforms. Also, I'm writing maintainable code
 
-// I follow TDD methodology in order to ensure the stability of the application using Jest testing framework.
+  // I follow TDD methodology in order to ensure the stability of the application using Jest testing framework.
 
-// I use Vim editor for development and work from an ArchLinux enviorenment`,
+  // I use Vim editor for development and work from an ArchLinux enviorenment`,
 
   notFound: " command not found",
 } as const;
